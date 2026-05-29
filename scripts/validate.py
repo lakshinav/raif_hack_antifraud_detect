@@ -18,7 +18,8 @@ from app.client import OpenRouterClient
 from app.models import (
     CLEAN_CATEGORY,
     PossibleRiskCategory,
-    process_risk_detection,
+    RiskClassifierDecision,
+    process_risk_detection_for_validation,
 )
 
 
@@ -42,6 +43,7 @@ class ValidationResult:
     predicted_category: PossibleRiskCategory
     processing_time_ms: int
     is_correct: bool
+    explanation: str | None = None
 
 
 @typing.final
@@ -126,17 +128,21 @@ async def validate_single_session(
     llm_client: OpenRouterClient,
     session: ValidationSession,
 ) -> ValidationResult:
-    """Process single session and return validation result."""
+    """Process single session and return validation result with explanation."""
     dialogue_text = format_dialogue_from_messages(session.messages)
     start_time = time.perf_counter()
 
-    risk_result = await process_risk_detection(llm_client, dialogue_text)
+    risk_decision: RiskClassifierDecision | None = await process_risk_detection_for_validation(
+        llm_client,
+        dialogue_text,
+    )
 
     processing_time_ms = int((time.perf_counter() - start_time) * 1000)
 
     predicted_category: PossibleRiskCategory = (
-        typing.cast("PossibleRiskCategory", risk_result["category"]) if risk_result else CLEAN_CATEGORY
+        risk_decision.category if risk_decision else CLEAN_CATEGORY
     )
+    explanation_value: str | None = risk_decision.explanation if risk_decision else None
 
     return ValidationResult(
         session_id=session.session_id,
@@ -144,6 +150,7 @@ async def validate_single_session(
         predicted_category=predicted_category,
         processing_time_ms=processing_time_ms,
         is_correct=predicted_category == session.expected_category,
+        explanation=explanation_value,
     )
 
 
@@ -288,6 +295,20 @@ def print_validation_report(report: ValidationReport) -> None:  # noqa: T201
                 f"predicted={result.predicted_category} "
                 f"({result.processing_time_ms}ms)"
             )
+            if result.explanation:
+                print(f"    Explanation: {result.explanation}")
+
+    print("\n" + "-" * 60)
+    print("ALL SESSION EXPLANATIONS")
+    print("-" * 60)
+    for result in report.results:
+        status_marker = "✓" if result.is_correct else "✗"
+        print(
+            f"  [{status_marker}] {result.session_id}: "
+            f"predicted={result.predicted_category}"
+        )
+        if result.explanation:
+            print(f"      {result.explanation}")
 
     print("\n" + "=" * 60)
 
@@ -319,6 +340,7 @@ def export_report_to_json(report: ValidationReport, output_path: Path) -> None:
                 "predicted_category": result.predicted_category,
                 "is_correct": result.is_correct,
                 "processing_time_ms": result.processing_time_ms,
+                "explanation": result.explanation,
             }
             for result in report.results
         ],

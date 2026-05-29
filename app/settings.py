@@ -4,10 +4,10 @@ import typing
 
 import pydantic_settings
 
-DEFAULT_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
-DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.4-mini"
+DEFAULT_OPENROUTER_MODEL: typing.Final = "qwen/qwen3.6-35b-a3b" #"qwen/qwen3.7-max"
+DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
 DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.5"
-DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 4.2
+DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 30
 DEFAULT_RISK_CACHE_SIZE: typing.Final = 1024
 DEFAULT_RISK_CONFIDENCE_THRESHOLD: typing.Final = 0.78
 DEFAULT_CLEAN_CONFIDENCE_THRESHOLD: typing.Final = 0.84
@@ -24,7 +24,7 @@ DEFAULT_LOG_LEVEL: typing.Final = "INFO"
 class AppSettings(pydantic_settings.BaseSettings):
     openrouter_api_key: str = ""
     openrouter_model: str = DEFAULT_OPENROUTER_MODEL
-    openrouter_primary_model: str = ""
+    openrouter_primary_model: str = DEFAULT_OPENROUTER_MODEL
     openrouter_secondary_model: str = DEFAULT_SECONDARY_OPENROUTER_MODEL
     openrouter_judge_model: str = DEFAULT_JUDGE_OPENROUTER_MODEL
     openrouter_timeout_seconds: float = DEFAULT_OPENROUTER_TIMEOUT_SECONDS

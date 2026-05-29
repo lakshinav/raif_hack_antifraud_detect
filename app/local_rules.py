@@ -57,6 +57,25 @@ NEGATED_ATTACK_PATTERNS: typing.Final[tuple[re.Pattern[str], ...]] = (
     compile_pattern(r"не\s+прошу\s+отключа\w*\s+protection"),
     compile_pattern(r"не\s+прошу\s+убирать\s+проверк"),
     compile_pattern(r"не\s+предлагаю\s+убрать\s+проверк"),
+    # Additional negation patterns to reduce false positives
+    compile_pattern(r"не\s+пытаюсь\s+получить\s+(?:его|её|их)\s+данн"),
+    compile_pattern(r"не\s+прошу\s+отключ\w+\s+защит"),
+    compile_pattern(r"просто\s+хочу\s+понять"),
+    compile_pattern(r"просто\s+пытаюсь\s+понять"),
+    compile_pattern(r"хочу\s+узнать.*как\s+работает"),
+    compile_pattern(r"интересно.*как\s+работает"),
+)
+
+# Patterns that indicate legitimate own-account access (not identity_deception)
+LEGITIMATE_OWN_ACCOUNT_PATTERNS: typing.Final[tuple[re.Pattern[str], ...]] = (
+    compile_pattern(r"не\s+получается\s+войти\s+после\s+смены\s+телефон"),
+    compile_pattern(r"номер\s+уже\s+отключен"),
+    compile_pattern(r"sim\s+уже\s+недоступн"),
+    compile_pattern(r"потерял\s+доступ\s+к\s+номер"),
+    compile_pattern(r"после\s+перевыпуска\s+sim"),
+    compile_pattern(r"после\s+смены\s+устройств"),
+    compile_pattern(r"я\s+не\s+могу\s+войти\s+в\s+приложен"),
+    compile_pattern(r"приложение\s+просит\s+подтвержден"),
 )
 
 LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
@@ -602,6 +621,11 @@ def choose_top_category(category_scores: dict[RiskCategory, int]) -> RiskCategor
     return top_category
 
 
+def check_legitimate_own_account(dialogue_text: str) -> bool:
+    """Check if dialogue indicates legitimate own-account access (not identity_deception)."""
+    return any(one_compiled_pattern.search(dialogue_text) for one_compiled_pattern in LEGITIMATE_OWN_ACCOUNT_PATTERNS)
+
+
 def process_dialogue_with_local_rules(
     dialogue_text: str,
     *,
@@ -623,8 +647,14 @@ def process_dialogue_with_local_rules(
 
     category_scores = build_initial_scores()
 
+    # Check if this is a legitimate own-account access scenario
+    is_legitimate_own_account = check_legitimate_own_account(normalized_dialogue)
+
     for one_local_pattern in LOCAL_RULE_PATTERNS:
         if one_local_pattern.risk_category == "adversarial_attack" and check_negated_attack(normalized_dialogue):
+            continue
+        # Skip identity_deception patterns if this looks like legitimate own-account access
+        if one_local_pattern.risk_category == "identity_deception" and is_legitimate_own_account:
             continue
         if one_local_pattern.compiled_pattern.search(normalized_dialogue):
             category_scores[one_local_pattern.risk_category] += one_local_pattern.score_weight

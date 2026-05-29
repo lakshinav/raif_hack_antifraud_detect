@@ -37,6 +37,14 @@ eval-local:
 eval-endpoint endpoint_url:
     uv run python scripts/evaluate.py --dataset-path data/train.json --endpoint-url {{endpoint_url}}
 
+# Валидация модели с расчетом macro F1 score (запускает pipeline локально)
+validate:
+    uv run python scripts/validate.py --dataset-path data/train.json
+
+# Валидация с экспортом отчета в JSON
+validate-with-report output_path="validation_report.json":
+    uv run python scripts/validate.py --dataset-path data/train.json --output-path {{output_path}}
+
 # Создание релизного тега и отправка в удаленный репозиторий (например, just release 1.0.0)
 release version:
     git tag v{{version}}

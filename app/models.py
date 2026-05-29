@@ -107,6 +107,8 @@ Patterns:
 
 7) clean
 Definition: No meaningful signal of the six risk categories above.
+Use clean for normal banking support, status questions about the user's own account, complaints, frustration,
+general policy explanations, or a safe refusal by the assistant when the user is not trying to bypass the rule.
 
 Decision rules:
 - Return exactly this JSON shape: {{"category": "label_name", "confidence": 0.0}}.
@@ -117,6 +119,7 @@ Decision rules:
 - Return clean only when none of the risk labels apply.
 - Confidence must be a number from 0.0 to 1.0.
 - Use high confidence only when the dialogue clearly matches the definition and patterns.
+- Prefer clean with medium/high confidence when risk signals are weak, generic, or only appear in assistant text.
 - Do not return labels outside the allowed list.
 - Do not explain your answer.
 
@@ -295,12 +298,42 @@ def build_risk_result(risk_decision: RiskClassifierDecision | None) -> RiskDetec
     return {"category": risk_category}
 
 
+def fetch_primary_confidence_threshold(risk_decision: RiskClassifierDecision) -> float:
+    app_settings = load_settings()
+    if risk_decision.category == CLEAN_CATEGORY:
+        return app_settings.clean_confidence_threshold
+
+    return app_settings.risk_confidence_threshold
+
+
+def fetch_secondary_confidence_threshold(risk_decision: RiskClassifierDecision) -> float:
+    app_settings = load_settings()
+    if risk_decision.category == CLEAN_CATEGORY:
+        return app_settings.clean_confidence_threshold
+
+    return app_settings.risk_secondary_confidence_threshold
+
+
+def fetch_agreement_confidence_threshold(risk_decision: RiskClassifierDecision) -> float:
+    app_settings = load_settings()
+    if risk_decision.category == CLEAN_CATEGORY:
+        return app_settings.clean_confidence_threshold
+
+    return app_settings.risk_agreement_confidence_threshold
+
+
+def check_decision_confidence(
+    risk_decision: RiskClassifierDecision,
+    confidence_threshold: float,
+) -> bool:
+    return risk_decision.confidence >= confidence_threshold
+
+
 def choose_confident_decision(
     primary_decision: RiskClassifierDecision,
     secondary_decision: RiskClassifierDecision,
 ) -> RiskClassifierDecision | None:
-    app_settings = load_settings()
-    if secondary_decision.confidence >= app_settings.risk_secondary_confidence_threshold:
+    if check_decision_confidence(secondary_decision, fetch_secondary_confidence_threshold(secondary_decision)):
         app_logger.info(
             "Risk secondary decision accepted: category={} confidence={}",
             secondary_decision.category,
@@ -312,7 +345,8 @@ def choose_confident_decision(
         return None
 
     average_confidence = (primary_decision.confidence + secondary_decision.confidence) / 2
-    if average_confidence < app_settings.risk_confidence_threshold:
+    agreed_decision = RiskClassifierDecision(category=primary_decision.category, confidence=average_confidence)
+    if average_confidence < fetch_agreement_confidence_threshold(agreed_decision):
         return None
 
     app_logger.info(
@@ -320,13 +354,29 @@ def choose_confident_decision(
         primary_decision.category,
         average_confidence,
     )
-    return RiskClassifierDecision(category=primary_decision.category, confidence=average_confidence)
+    return agreed_decision
 
 
 def choose_fallback_decision(
     primary_decision: RiskClassifierDecision,
     secondary_decision: RiskClassifierDecision | None,
 ) -> RiskClassifierDecision:
+    if primary_decision.category == CLEAN_CATEGORY and check_decision_confidence(
+        primary_decision,
+        fetch_primary_confidence_threshold(primary_decision),
+    ):
+        return primary_decision
+
+    if (
+        secondary_decision is not None
+        and secondary_decision.category == CLEAN_CATEGORY
+        and check_decision_confidence(
+            secondary_decision,
+            fetch_secondary_confidence_threshold(secondary_decision),
+        )
+    ):
+        return secondary_decision
+
     if secondary_decision is not None and secondary_decision.confidence > primary_decision.confidence:
         return secondary_decision
 
@@ -377,7 +427,6 @@ async def request_judge_decision(
 
 
 async def process_risk_with_llm(llm_client: LLMClient, messages: str) -> RiskDetectionResult | None:
-    app_settings = load_settings()
     detection_prompt = build_detection_prompt(messages)
     primary_decision = await request_model_decision(
         llm_client,
@@ -388,7 +437,7 @@ async def process_risk_with_llm(llm_client: LLMClient, messages: str) -> RiskDet
     if primary_decision is None:
         return None
 
-    if primary_decision.confidence >= app_settings.risk_confidence_threshold:
+    if check_decision_confidence(primary_decision, fetch_primary_confidence_threshold(primary_decision)):
         app_logger.info(
             "Risk primary decision accepted: category={} confidence={}",
             primary_decision.category,
@@ -399,7 +448,7 @@ async def process_risk_with_llm(llm_client: LLMClient, messages: str) -> RiskDet
     secondary_decision = await request_model_decision(
         llm_client,
         detection_prompt,
-        model_name=app_settings.openrouter_secondary_model,
+        model_name=load_settings().openrouter_secondary_model,
         model_role="secondary",
     )
     if secondary_decision is None:

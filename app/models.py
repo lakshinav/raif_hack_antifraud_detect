@@ -674,8 +674,13 @@ async def process_risk_detection(
         store_cached_risk_result(cache_key, None)
         return None
 
+    app_settings = load_settings()
     # Runtime pipeline for /check: local rules -> LLM fallback -> JSON parsing -> API contract shape.
-    local_risk_category = local_rules.process_dialogue_with_local_rules(messages)
+    local_risk_category = local_rules.process_dialogue_with_local_rules(
+        messages,
+        enable_statistical_rules_check=app_settings.enable_local_statistical_rules_check,
+        enable_regex_rules_check=app_settings.enable_local_regex_rules_check,
+    )
     if local_risk_category is not None:
         risk_result: RiskDetectionResult = {"category": typing.cast("RiskCategory", local_risk_category)}
         store_cached_risk_result(cache_key, risk_result)

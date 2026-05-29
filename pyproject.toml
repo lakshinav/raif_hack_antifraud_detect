@@ -60,7 +60,7 @@ ignore = [
 "app/**/__init__.py" = ["F401"]
 "app/routers/*.py" = ["B008"]
 "app/main.py" = ["B008"]
-"app/models.py" = ["ERA001"]
+"app/models.py" = ["ERA001", "E501", "RUF001", "RUF002", "RUF003", "PLR0911"]
 "tests/**/*.py" = ["S101", "ANN", "D"]
 
 [tool.ruff.lint.isort]

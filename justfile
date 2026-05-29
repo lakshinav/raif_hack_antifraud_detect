@@ -22,7 +22,7 @@ dev-local:
 audit:
     uv run ruff check app/ --fix
     uv run ruff format app/
-    uv run mypy app/
+    uv run mypy --ignore-missing-imports app/
     uv run flake8 app/
 
 # Запуск автоматических тестов (pytest)

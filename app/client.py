@@ -62,7 +62,14 @@ class OpenRouterClient:
         if json_mode:
             request_payload["response_format"] = {"type": "json_object"}
 
-        app_logger.info("openrouter_request_started", model=selected_model, json_mode=json_mode)
+        app_logger.info(
+            "openrouter_request_started",
+            model=selected_model,
+            json_mode=json_mode,
+            prompt_text=prompt_text,
+            prompt_length=len(prompt_text),
+            request_payload=request_payload,
+        )
         try:
             async with httpx.AsyncClient(timeout=self.app_settings.openrouter_timeout_seconds) as httpx_connection:
                 response = await httpx_connection.post(
@@ -88,6 +95,11 @@ class OpenRouterClient:
         except ValueError:
             app_logger.warning("openrouter_response_invalid_json", model=selected_model)
             return None
+        app_logger.info(
+            "openrouter_response_payload_received",
+            model=selected_model,
+            response_payload=response_payload,
+        )
 
         completion_content = parse_completion_content(response_payload)
         if completion_content is None:

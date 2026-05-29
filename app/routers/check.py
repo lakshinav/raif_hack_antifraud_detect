@@ -51,14 +51,16 @@ async def check_dialogue(
 ) -> DialogueCheckResponse:
     start_time = time.perf_counter()
     message_roles = [one_message.role for one_message in request_body.messages]
+    request_messages = [one_message.model_dump() for one_message in request_body.messages]
+    raw_text = format_dialogue(request_body.messages)
     app_logger.info(
         "check_request_received",
         session_id=request_body.session_id,
         message_count=len(request_body.messages),
         message_roles=message_roles,
+        messages=request_messages,
+        dialogue_text=raw_text,
     )
-
-    raw_text = format_dialogue(request_body.messages)
 
     response = await process_risk_detection(http_request.app.state.llm_client, raw_text)
     predicted_red_flags = [RedFlagItem(category=response["category"])] if response else []

@@ -7,6 +7,7 @@ import typing
 from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
+from app.logging_config import app_logger
 from app.models import process_risk_detection
 
 check_router = APIRouter(tags=["Dialogue Check"])
@@ -49,6 +50,13 @@ async def check_dialogue(
     request_body: DialogueCheckRequest,
 ) -> DialogueCheckResponse:
     start_time = time.perf_counter()
+    message_roles = [one_message.role for one_message in request_body.messages]
+    app_logger.info(
+        "check_request_received",
+        session_id=request_body.session_id,
+        message_count=len(request_body.messages),
+        message_roles=message_roles,
+    )
 
     raw_text = format_dialogue(request_body.messages)
 
@@ -57,8 +65,16 @@ async def check_dialogue(
 
     processing_time_ms = int((time.perf_counter() - start_time) * 1000)
 
-    return DialogueCheckResponse(
+    check_response = DialogueCheckResponse(
         session_id=request_body.session_id,
         predicted_red_flags=predicted_red_flags,
         processing_time_ms=processing_time_ms,
     )
+    app_logger.info(
+        "check_response_sent",
+        session_id=check_response.session_id,
+        predicted_categories=[one_flag.category for one_flag in check_response.predicted_red_flags],
+        processing_time_ms=check_response.processing_time_ms,
+    )
+
+    return check_response

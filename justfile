@@ -29,6 +29,14 @@ audit:
 test:
     uv run pytest
 
+# Локальная оценка качества на train-датасете через запущенный локальный /check endpoint
+eval-local:
+    uv run python scripts/evaluate.py --dataset-path data/train.json
+
+# Оценка любого /check endpoint (пример: just eval-endpoint http://127.0.0.1:8787/check)
+eval-endpoint endpoint_url:
+    uv run python scripts/evaluate.py --dataset-path data/train.json --endpoint-url {{endpoint_url}}
+
 # Создание релизного тега и отправка в удаленный репозиторий (например, just release 1.0.0)
 release version:
     git tag v{{version}}

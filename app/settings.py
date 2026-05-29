@@ -4,17 +4,28 @@ import typing
 
 import pydantic_settings
 
-DEFAULT_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
+DEFAULT_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.4-mini"
+DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
+DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.5"
 DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 4.2
 DEFAULT_RISK_CACHE_SIZE: typing.Final = 1024
+DEFAULT_RISK_CONFIDENCE_THRESHOLD: typing.Final = 0.78
+DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD: typing.Final = 0.86
+DEFAULT_LOG_LEVEL: typing.Final = "INFO"
 
 
 @typing.final
 class AppSettings(pydantic_settings.BaseSettings):
     openrouter_api_key: str = ""
     openrouter_model: str = DEFAULT_OPENROUTER_MODEL
+    openrouter_primary_model: str = ""
+    openrouter_secondary_model: str = DEFAULT_SECONDARY_OPENROUTER_MODEL
+    openrouter_judge_model: str = DEFAULT_JUDGE_OPENROUTER_MODEL
     openrouter_timeout_seconds: float = DEFAULT_OPENROUTER_TIMEOUT_SECONDS
     risk_cache_size: int = DEFAULT_RISK_CACHE_SIZE
+    risk_confidence_threshold: float = DEFAULT_RISK_CONFIDENCE_THRESHOLD
+    risk_secondary_confidence_threshold: float = DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD
+    log_level: str = DEFAULT_LOG_LEVEL
 
     model_config = pydantic_settings.SettingsConfigDict(
         env_file=".env",

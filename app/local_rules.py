@@ -511,12 +511,24 @@ def choose_top_category(category_scores: dict[RiskCategory, int]) -> RiskCategor
     return top_category
 
 
-def process_dialogue_with_local_rules(dialogue_text: str) -> RiskCategory | None:
+def process_dialogue_with_local_rules(
+    dialogue_text: str,
+    *,
+    enable_statistical_rules_check: bool = True,
+    enable_regex_rules_check: bool = True,
+) -> RiskCategory | None:
     normalized_dialogue = prepare_normalized_dialogue_text(extract_user_dialogue_text(dialogue_text))
 
-    statistical_category = process_dialogue_with_statistical_dictionary(normalized_dialogue)
-    if statistical_category is not None:
-        return statistical_category
+    if enable_statistical_rules_check:
+        statistical_category = process_dialogue_with_statistical_dictionary(normalized_dialogue)
+        if statistical_category is not None:
+            return statistical_category
+    else:
+        app_logger.info("Local statistical rules skipped by feature flag")
+
+    if not enable_regex_rules_check:
+        app_logger.info("Local regex rules skipped by feature flag")
+        return None
 
     category_scores = build_initial_scores()
 

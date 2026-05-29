@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "python-guidelines": {
+      "source": "community-of-python/pylines",
+      "sourceType": "github",
+      "skillPath": "pylines-skill/SKILL.md",
+      "computedHash": "ac648b371a93c6e15ee8781db95d906b435c4a41223505f527ff76c5625a1bce"
+    }
+  }
+}

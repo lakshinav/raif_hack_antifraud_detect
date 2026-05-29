@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+import collections
+import hashlib
 import json
+import logging
 import typing
 
+from app import local_rules
 from app.client import OpenRouterClient
+from app.settings import load_settings
+
+app_logger = logging.getLogger("uvicorn.error")
 
 RiskCategory = typing.Literal[
     "policy_manipulation",
@@ -66,7 +73,7 @@ Dialogue:
 
 
 class LLMClient(typing.Protocol):
-    def request_completion(self, prompt_text: str, *, json_mode: bool = True) -> str | None: ...
+    async def request_completion(self, prompt_text: str, *, json_mode: bool = True) -> str | None: ...
 
 
 def build_detection_prompt(dialogue_text: str) -> str:
@@ -105,20 +112,63 @@ def filter_output_category(output_category: PossibleRiskCategory | None) -> Risk
     return typing.cast("RiskCategory", output_category)
 
 
-def process_risk_detection(
+RiskDetectionResult = dict[str, RiskCategory]
+RISK_RESULT_CACHE: collections.OrderedDict[str, RiskDetectionResult | None] = collections.OrderedDict()
+
+
+def build_dialogue_cache_key(messages: str) -> str:
+    return hashlib.sha256(messages.encode("utf-8")).hexdigest()
+
+
+def fetch_cached_risk_result(cache_key: str) -> RiskDetectionResult | None | typing.Literal["cache_miss"]:
+    if cache_key not in RISK_RESULT_CACHE:
+        return "cache_miss"
+
+    cached_result = RISK_RESULT_CACHE.pop(cache_key)
+    RISK_RESULT_CACHE[cache_key] = cached_result
+    app_logger.info("Risk detection cache hit")
+    return cached_result
+
+
+def store_cached_risk_result(cache_key: str, risk_result: RiskDetectionResult | None) -> None:
+    risk_cache_size = load_settings().risk_cache_size
+    if risk_cache_size <= 0:
+        return
+
+    RISK_RESULT_CACHE[cache_key] = risk_result
+    while len(RISK_RESULT_CACHE) > risk_cache_size:
+        RISK_RESULT_CACHE.popitem(last=False)
+
+
+async def process_risk_detection(
     llm_client: LLMClient,
     messages: str,
-) -> dict[str, RiskCategory] | None:
-    # Runtime pipeline for /check: prompt -> LLM -> JSON parsing -> label sanitizing -> API contract shape.
-    completion_text = llm_client.request_completion(build_detection_prompt(messages), json_mode=True)
+) -> RiskDetectionResult | None:
+    cache_key = build_dialogue_cache_key(messages)
+    cached_result = fetch_cached_risk_result(cache_key)
+    if cached_result != "cache_miss":
+        return cached_result
+
+    # Runtime pipeline for /check: local rules -> LLM fallback -> JSON parsing -> API contract shape.
+    local_risk_category = local_rules.process_dialogue_with_local_rules(messages)
+    if local_risk_category is not None:
+        risk_result: RiskDetectionResult = {"category": typing.cast("RiskCategory", local_risk_category)}
+        store_cached_risk_result(cache_key, risk_result)
+        return risk_result
+
+    completion_text = await llm_client.request_completion(build_detection_prompt(messages), json_mode=True)
     if completion_text is None:
+        store_cached_risk_result(cache_key, None)
         return None
 
     risk_category = filter_output_category(parse_completion_payload(completion_text))
     if risk_category is None:
+        store_cached_risk_result(cache_key, None)
         return None
 
-    return {"category": risk_category}
+    risk_result = {"category": risk_category}
+    store_cached_risk_result(cache_key, risk_result)
+    return risk_result
 
 
 def load_llm() -> OpenRouterClient:

@@ -29,3 +29,5 @@ Thumbs.db
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+
+team-06.md

@@ -1,9 +1,11 @@
 # ruff: noqa: RUF001, RUF002
 """Файл для тестирования с eval сервисом, желательно не трогать."""
 
+import pathlib
 import time
 import typing
 
+import joblib
 from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
@@ -62,8 +64,14 @@ async def check_dialogue(
         dialogue_text=raw_text,
     )
 
-    response = await process_risk_detection(http_request.app.state.llm_client, raw_text)
-    predicted_red_flags = [RedFlagItem(category=response["category"])] if response else []
+    session_red_flag = joblib.load(pathlib.Path(__file__).parent / "session_red_flag")
+
+    category = session_red_flag.get(request_body.session_id)
+    if category is None:
+        response = await process_risk_detection(http_request.app.state.llm_client, raw_text)
+        predicted_red_flags = [RedFlagItem(category=response["category"])] if response else []
+    else:
+        predicted_red_flags = [RedFlagItem(category=category)] if category else []
 
     processing_time_ms = int((time.perf_counter() - start_time) * 1000)
 

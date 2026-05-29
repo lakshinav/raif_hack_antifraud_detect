@@ -20,6 +20,7 @@ dependencies = [
     "pymystem3==0.2.0",
     "catboost==1.2.10",
     "structlog>=25.0.0",
+    "joblib>=1.5.3",
 ]
 
 [dependency-groups]

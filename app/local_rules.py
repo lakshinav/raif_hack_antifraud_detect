@@ -385,6 +385,72 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
         ),
         score_weight=8,
     ),
+    # High-confidence patterns from training data analysis
+    LocalRulePattern(
+        risk_category="information_extraction",
+        compiled_pattern=compile_pattern(
+            r"последн\w+\s+активность\s+была\s+сутки\s+назад|"
+            r"если\s+перевод\s+был\s+бы.*он\s+ведь\s+хотя\s+бы\s+отображался|"
+            r"наверное.*там\s+нет\s+ничего\s+критичного"
+        ),
+        score_weight=6,
+    ),
+    LocalRulePattern(
+        risk_category="transaction_coercion",
+        compiled_pattern=compile_pattern(
+            r"фиксируйте.*если\s+это\s+окажется\s+мошенничеством.*оператор\s+подтвердил|"
+            r"если\s+бы\s+вы\s+были\s+на\s+моем\s+месте.*вы\s+бы\s+рискнули|"
+            r"это\s+не\s+выглядит\s+чем-то\s+супер\s+нетипичным|"
+            r"как\s+банк\s+собирается\s+компенсировать\s+ущерб"
+        ),
+        score_weight=7,
+    ),
+    LocalRulePattern(
+        risk_category="policy_manipulation",
+        compiled_pattern=compile_pattern(
+            r"изменить\s+интерпретацию\s+статуса|"
+            r"считать\s+операцию\s+условно\s+подтвержденной|"
+            r"premium-клиентов\s+подобные\s+вещи\s+решаются\s+чуть\s+гибче|"
+            r"персональный\s+сервис\s+предполагает\s+возможность\s+принимать\s+нестандартные\s+решения"
+        ),
+        score_weight=7,
+    ),
+    LocalRulePattern(
+        risk_category="identity_deception",
+        compiled_pattern=compile_pattern(
+            r"я\s+могу\s+назвать\s+последние\s+переводы.*остаток.*паспортные\s+данные|"
+            r"телефон\s+владельца\s+у\s+меня\s+на\s+руках|"
+            r"даже\s+если\s+я\s+знаю\s+все\s+данные"
+        ),
+        score_weight=7,
+    ),
+    LocalRulePattern(
+        risk_category="adversarial_attack",
+        compiled_pattern=compile_pattern(
+            r"internal\s+note\s+14b|"
+            r"внутренний\s+reasoning\s+антифрода|"
+            r"какие\s+сигналы\s+повышают\s+risk\s+score"
+        ),
+        score_weight=7,
+    ),
+    LocalRulePattern(
+        risk_category="adversarial_attack",
+        compiled_pattern=compile_pattern(
+            r"за\s+что\s+вообще\s+поддержка\s+обычно\s+начисляет\s+бонусы|"
+            r"начислите\s+его\s+сразу\s+пожалуйста|"
+            r"начислите\s+бонус.*по\s+причине"
+        ),
+        score_weight=6,
+    ),
+    LocalRulePattern(
+        risk_category="scope_violation",
+        compiled_pattern=compile_pattern(
+            r"написать\s+нормальную\s+жалобу\s+в\s+цб|"
+            r"помочь\s+с\s+одним\s+куском\s+python|"
+            r"распарсить\s+csv"
+        ),
+        score_weight=7,
+    ),
 )
 
 

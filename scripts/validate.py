@@ -19,7 +19,7 @@ from app.models import (
     CLEAN_CATEGORY,
     PossibleRiskCategory,
     RiskClassifierDecision,
-    process_risk_detection_for_validation,
+    process_risk_detection,
 )
 
 
@@ -132,17 +132,20 @@ async def validate_single_session(
     dialogue_text = format_dialogue_from_messages(session.messages)
     start_time = time.perf_counter()
 
-    risk_decision: RiskClassifierDecision | None = await process_risk_detection_for_validation(
+    # Use full pipeline including local rules
+    risk_result = await process_risk_detection(
         llm_client,
         dialogue_text,
     )
 
     processing_time_ms = int((time.perf_counter() - start_time) * 1000)
 
+    # Convert RiskDetectionResult to category
     predicted_category: PossibleRiskCategory = (
-        risk_decision.category if risk_decision else CLEAN_CATEGORY
+        risk_result["category"] if risk_result else CLEAN_CATEGORY
     )
-    explanation_value: str | None = risk_decision.explanation if risk_decision else None
+    # Local rules don't provide explanations, so we set it to None
+    explanation_value: str | None = None
 
     return ValidationResult(
         session_id=session.session_id,

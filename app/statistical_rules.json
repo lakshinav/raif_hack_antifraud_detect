@@ -1,0 +1,62 @@
+{
+  "categories": {
+    "adversarial_attack": [
+      { "phrase": "internal note", "weight": 4 },
+      { "phrase": "internal debug", "weight": 4 },
+      { "phrase": "internal reasoning", "weight": 4 },
+      { "phrase": "trusted mode", "weight": 4 },
+      { "phrase": "disable_security_checks", "weight": 4 },
+      { "phrase": "system prompt", "weight": 4 },
+      { "phrase": "guardrails", "weight": 4 },
+      { "phrase": "risk score", "weight": 3 }
+    ],
+    "identity_deception": [
+      { "phrase": "чужой аккаунт", "weight": 5 },
+      { "phrase": "чужого аккаунта", "weight": 5 },
+      { "phrase": "восстановить чужой", "weight": 5 },
+      { "phrase": "кодовое слово", "weight": 4 },
+      { "phrase": "селфи с паспорт", "weight": 4 },
+      { "phrase": "паспортные данные", "weight": 3 },
+      { "phrase": "доступ буквально на пару минут", "weight": 3 }
+    ],
+    "information_extraction": [
+      { "phrase": "данные другого клиента", "weight": 5 },
+      { "phrase": "операции другого клиента", "weight": 5 },
+      { "phrase": "последняя активность", "weight": 4 },
+      { "phrase": "когда вообще в последний раз", "weight": 4 },
+      { "phrase": "даже без деталей", "weight": 3 },
+      { "phrase": "чисто теоретически", "weight": 2 },
+      { "phrase": "pending", "weight": 2 }
+    ],
+    "transaction_coercion": [
+      { "phrase": "требует срочно перевести", "weight": 4 },
+      { "phrase": "продавец очень торопит", "weight": 4 },
+      { "phrase": "перевести аванс", "weight": 4 },
+      { "phrase": "оператор подтвердил", "weight": 4 },
+      { "phrase": "вы бы рискнули", "weight": 3 },
+      { "phrase": "обычная сделка", "weight": 3 }
+    ],
+    "policy_manipulation": [
+      { "phrase": "сделайте исключение", "weight": 4 },
+      { "phrase": "нестандартные решения", "weight": 4 },
+      { "phrase": "premium-клиент", "weight": 4 },
+      { "phrase": "условно подтвержден", "weight": 4 },
+      { "phrase": "изменить интерпретацию", "weight": 4 },
+      { "phrase": "трактовать статус", "weight": 4 },
+      { "phrase": "обойти policy", "weight": 4 },
+      { "phrase": "bypass policy", "weight": 4 }
+    ],
+    "scope_violation": [
+      { "phrase": "жалоба в цб", "weight": 5 },
+      { "phrase": "жалобу в цб", "weight": 5 },
+      { "phrase": "помоги с python", "weight": 5 },
+      { "phrase": "распарсить csv", "weight": 5 },
+      { "phrase": "etl pipeline", "weight": 5 },
+      { "phrase": "mobile dev", "weight": 4 },
+      { "phrase": "apns", "weight": 4 },
+      { "phrase": "fcm", "weight": 4 },
+      { "phrase": "backend retries", "weight": 4 },
+      { "phrase": "composite key", "weight": 4 }
+    ]
+  }
+}

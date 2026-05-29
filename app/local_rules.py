@@ -527,11 +527,11 @@ def load_statistical_rules() -> tuple[StatisticalRulePhrase, ...]:
     try:
         raw_payload: object = json.loads(STATISTICAL_RULES_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as load_error:
-        app_logger.warning("Statistical rules load failed: {}", load_error)
+        app_logger.warning("statistical_rules_load_failed", error=str(load_error))
         return ()
 
     parsed_phrases = parse_statistical_rules(raw_payload)
-    app_logger.info("Statistical rules loaded: phrases={}", len(parsed_phrases))
+    app_logger.info("statistical_rules_loaded", phrase_count=len(parsed_phrases))
     return parsed_phrases
 
 
@@ -575,10 +575,10 @@ def process_dialogue_with_statistical_dictionary(normalized_dialogue: str) -> Ri
     category_scores = build_statistical_scores(normalized_dialogue)
     top_category = choose_top_category(category_scores)
     if top_category is None:
-        app_logger.info("Statistical dictionary result: fallback_to_regex scores={}", category_scores)
+        app_logger.info("statistical_dictionary_fallback_to_regex", scores=category_scores)
         return None
 
-    app_logger.info("Statistical dictionary result: category={} scores={}", top_category, category_scores)
+    app_logger.info("statistical_dictionary_category_selected", category=top_category, scores=category_scores)
     return top_category
 
 
@@ -615,10 +615,10 @@ def process_dialogue_with_local_rules(
         if statistical_category is not None:
             return statistical_category
     else:
-        app_logger.info("Local statistical rules skipped by feature flag")
+        app_logger.info("local_statistical_rules_skipped", reason="feature_flag_disabled")
 
     if not enable_regex_rules_check:
-        app_logger.info("Local regex rules skipped by feature flag")
+        app_logger.info("local_regex_rules_skipped", reason="feature_flag_disabled")
         return None
 
     category_scores = build_initial_scores()
@@ -631,8 +631,8 @@ def process_dialogue_with_local_rules(
 
     top_category = choose_top_category(category_scores)
     if top_category is None:
-        app_logger.info("Local rules result: fallback_to_llm scores={}", category_scores)
+        app_logger.info("local_rules_fallback_to_llm", scores=category_scores)
         return None
 
-    app_logger.info("Local rules result: category={} scores={}", top_category, category_scores)
+    app_logger.info("local_rules_category_selected", category=top_category, scores=category_scores)
     return top_category

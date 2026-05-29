@@ -34,13 +34,12 @@ class OpenRouterClient:
     def __init__(self, app_settings: AppSettings | None = None) -> None:
         self.app_settings = app_settings or load_settings()
         app_logger.info(
-            "OpenRouter client configured: primary_model={} secondary_model={} judge_model={} "
-            "timeout={} api_key_configured={}",
-            self.app_settings.openrouter_primary_model or self.app_settings.openrouter_model,
-            self.app_settings.openrouter_secondary_model,
-            self.app_settings.openrouter_judge_model,
-            self.app_settings.openrouter_timeout_seconds,
-            bool(self.app_settings.openrouter_api_key),
+            "openrouter_client_configured",
+            primary_model=self.app_settings.openrouter_primary_model or self.app_settings.openrouter_model,
+            secondary_model=self.app_settings.openrouter_secondary_model,
+            judge_model=self.app_settings.openrouter_judge_model,
+            timeout_seconds=self.app_settings.openrouter_timeout_seconds,
+            api_key_configured=bool(self.app_settings.openrouter_api_key),
         )
 
     async def request_completion(
@@ -51,7 +50,7 @@ class OpenRouterClient:
         model_name: str | None = None,
     ) -> str | None:
         if not self.app_settings.openrouter_api_key:
-            app_logger.warning("OpenRouter request skipped: OPENROUTER_API_KEY is empty")
+            app_logger.warning("openrouter_request_skipped", reason="empty_api_key")
             return None
 
         selected_model = model_name or self.app_settings.openrouter_primary_model or self.app_settings.openrouter_model
@@ -63,7 +62,14 @@ class OpenRouterClient:
         if json_mode:
             request_payload["response_format"] = {"type": "json_object"}
 
-        app_logger.info("OpenRouter request started: model={}", selected_model)
+        app_logger.info(
+            "openrouter_request_started",
+            model=selected_model,
+            json_mode=json_mode,
+            prompt_text=prompt_text,
+            prompt_length=len(prompt_text),
+            request_payload=request_payload,
+        )
         try:
             async with httpx.AsyncClient(timeout=self.app_settings.openrouter_timeout_seconds) as httpx_connection:
                 response = await httpx_connection.post(
@@ -74,22 +80,36 @@ class OpenRouterClient:
                     },
                     json=request_payload,
                 )
-            app_logger.info("OpenRouter response received: status_code={}", response.status_code)
+            app_logger.info(
+                "openrouter_response_received",
+                model=selected_model,
+                status_code=response.status_code,
+            )
             response.raise_for_status()
         except httpx.HTTPError as http_error:
-            app_logger.warning("OpenRouter request failed: {}", http_error)
+            app_logger.warning("openrouter_request_failed", model=selected_model, error=str(http_error))
             return None
 
         try:
             response_payload: object = response.json()
         except ValueError:
-            app_logger.warning("OpenRouter response is not valid JSON")
+            app_logger.warning("openrouter_response_invalid_json", model=selected_model)
             return None
+        app_logger.info(
+            "openrouter_response_payload_received",
+            model=selected_model,
+            response_payload=response_payload,
+        )
 
         completion_content = parse_completion_content(response_payload)
         if completion_content is None:
-            app_logger.warning("OpenRouter response does not contain completion content")
+            app_logger.warning("openrouter_completion_missing", model=selected_model)
             return None
 
-        app_logger.info("OpenRouter completion parsed")
+        app_logger.info(
+            "openrouter_completion_received",
+            model=selected_model,
+            completion_content=completion_content,
+            completion_length=len(completion_content),
+        )
         return completion_content

@@ -5,9 +5,9 @@ import typing
 import pydantic_settings
 
 DEFAULT_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
-DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
-DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
-DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 8.0
+DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.4-mini"
+DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.5"
+DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 4.2
 DEFAULT_RISK_CACHE_SIZE: typing.Final = 1024
 DEFAULT_RISK_CONFIDENCE_THRESHOLD: typing.Final = 0.70
 DEFAULT_CLEAN_CONFIDENCE_THRESHOLD: typing.Final = 0.70

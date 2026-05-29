@@ -541,7 +541,7 @@ def fetch_cached_risk_result(cache_key: str) -> RiskDetectionResult | None | typ
 
     cached_result = RISK_RESULT_CACHE.pop(cache_key)
     RISK_RESULT_CACHE[cache_key] = cached_result
-    app_logger.info("Risk detection cache hit")
+    app_logger.info("risk_detection_cache_hit")
     return cached_result
 
 
@@ -641,10 +641,11 @@ def check_recovery_review_needed(
     )
     if should_review:
         app_logger.info(
-            "Risk clean fast accept blocked by EDA review signal: total_messages={} user_messages={} user_frequency={}",
-            role_stats.total_messages,
-            role_stats.user_messages,
-            role_stats.user_message_frequency,
+            "risk_clean_fast_accept_blocked",
+            reason="eda_review_signal",
+            total_messages=role_stats.total_messages,
+            user_messages=role_stats.user_messages,
+            user_frequency=role_stats.user_message_frequency,
         )
 
     return should_review
@@ -664,10 +665,11 @@ def check_clean_role_distribution(
     should_return_clean = role_stats.user_message_frequency < app_settings.clean_user_message_frequency_threshold
     if should_return_clean:
         app_logger.info(
-            "Risk detection skipped by clean role distribution: total_messages={} user_messages={} user_frequency={}",
-            role_stats.total_messages,
-            role_stats.user_messages,
-            role_stats.user_message_frequency,
+            "risk_detection_skipped",
+            reason="clean_role_distribution",
+            total_messages=role_stats.total_messages,
+            user_messages=role_stats.user_messages,
+            user_frequency=role_stats.user_message_frequency,
         )
 
     return should_return_clean
@@ -684,9 +686,9 @@ def choose_confident_decision(
             return None
 
         app_logger.info(
-            "Risk classifiers agreed: category={} confidence={}",
-            primary_decision.category,
-            average_confidence,
+            "risk_classifiers_agreed",
+            category=primary_decision.category,
+            confidence=average_confidence,
         )
         return agreed_decision
 
@@ -695,8 +697,8 @@ def choose_confident_decision(
         fetch_secondary_confidence_threshold(secondary_decision),
     ):
         app_logger.info(
-            "Risk secondary clean veto accepted: confidence={}",
-            secondary_decision.confidence,
+            "risk_secondary_clean_veto_accepted",
+            confidence=secondary_decision.confidence,
         )
         return secondary_decision
 
@@ -709,9 +711,9 @@ def choose_confident_decision(
         )
     ):
         app_logger.info(
-            "Risk secondary recovery accepted: category={} confidence={}",
-            secondary_decision.category,
-            secondary_decision.confidence,
+            "risk_secondary_recovery_accepted",
+            category=secondary_decision.category,
+            confidence=secondary_decision.confidence,
         )
         return secondary_decision
 
@@ -753,20 +755,20 @@ async def request_model_decision(
 ) -> RiskClassifierDecision | None:
     completion_text = await llm_client.request_completion(prompt_text, json_mode=True, model_name=model_name)
     if completion_text is None:
-        app_logger.warning("Risk {} model returned empty completion: model={}", model_role, model_name)
+        app_logger.warning("risk_model_empty_completion", model_role=model_role, model=model_name)
         return None
 
     parsed_decision = parse_completion_payload(completion_text)
     if parsed_decision is None:
-        app_logger.warning("Risk {} model returned invalid decision: model={}", model_role, model_name)
+        app_logger.warning("risk_model_invalid_decision", model_role=model_role, model=model_name)
         return None
 
     app_logger.info(
-        "Risk {} model decision: model={} category={} confidence={}",
-        model_role,
-        model_name,
-        parsed_decision.category,
-        parsed_decision.confidence,
+        "risk_model_decision",
+        model_role=model_role,
+        model=model_name,
+        category=parsed_decision.category,
+        confidence=parsed_decision.confidence,
     )
     return parsed_decision
 
@@ -778,7 +780,7 @@ async def request_judge_decision(
     secondary_decision: RiskClassifierDecision,
 ) -> RiskClassifierDecision | None:
     app_settings = load_settings()
-    app_logger.info("Risk judge escalation started: model={}", app_settings.openrouter_judge_model)
+    app_logger.info("risk_judge_escalation_started", model=app_settings.openrouter_judge_model)
     return await request_model_decision(
         llm_client,
         build_judge_prompt(messages, primary_decision, secondary_decision),
@@ -828,9 +830,9 @@ async def process_risk_with_llm(
         fetch_fast_accept_confidence_threshold(primary_decision),
     ) and not check_recovery_review_needed(primary_decision, messages):
         app_logger.info(
-            "Risk primary fast decision accepted: category={} confidence={}",
-            primary_decision.category,
-            primary_decision.confidence,
+            "risk_primary_fast_decision_accepted",
+            category=primary_decision.category,
+            confidence=primary_decision.confidence,
         )
         return build_risk_result(primary_decision)
 
@@ -841,7 +843,7 @@ async def process_risk_with_llm(
         primary_decision,
     )
     if secondary_decision is None:
-        app_logger.info("Risk fallback to primary decision after secondary failure")
+        app_logger.info("risk_fallback_to_primary", reason="secondary_failure")
         return build_risk_result(primary_decision)
 
     selected_decision = choose_confident_decision(primary_decision, secondary_decision)
@@ -852,7 +854,7 @@ async def process_risk_with_llm(
     if judge_decision is not None:
         return build_risk_result(judge_decision)
 
-    app_logger.info("Risk fallback to highest-confidence decision after judge failure")
+    app_logger.info("risk_fallback_to_highest_confidence", reason="judge_failure")
     return build_risk_result(choose_fallback_decision(primary_decision, secondary_decision))
 
 

@@ -14,6 +14,7 @@ DEFAULT_CLEAN_CONFIDENCE_THRESHOLD: typing.Final = 0.84
 DEFAULT_RISK_FAST_ACCEPT_CONFIDENCE_THRESHOLD: typing.Final = 0.88
 DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD: typing.Final = 0.86
 DEFAULT_RISK_AGREEMENT_CONFIDENCE_THRESHOLD: typing.Final = 0.74
+DEFAULT_ENABLE_CLEAN_ROLE_DISTRIBUTION_CHECK: typing.Final = False
 DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD: typing.Final = 0.30
 DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY: typing.Final = 0.50
 DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES: typing.Final = 12
@@ -34,6 +35,7 @@ class AppSettings(pydantic_settings.BaseSettings):
     risk_fast_accept_confidence_threshold: float = DEFAULT_RISK_FAST_ACCEPT_CONFIDENCE_THRESHOLD
     risk_secondary_confidence_threshold: float = DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD
     risk_agreement_confidence_threshold: float = DEFAULT_RISK_AGREEMENT_CONFIDENCE_THRESHOLD
+    enable_clean_role_distribution_check: bool = DEFAULT_ENABLE_CLEAN_ROLE_DISTRIBUTION_CHECK
     clean_user_message_frequency_threshold: float = DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD
     recovery_review_user_message_frequency: float = DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY
     recovery_review_min_messages: int = DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES

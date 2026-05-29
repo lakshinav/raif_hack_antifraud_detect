@@ -41,7 +41,7 @@ class OpenRouterClient:
             bool(self.app_settings.openrouter_api_key),
         )
 
-    def request_completion(self, prompt_text: str, *, json_mode: bool = True) -> str | None:
+    async def request_completion(self, prompt_text: str, *, json_mode: bool = True) -> str | None:
         if not self.app_settings.openrouter_api_key:
             app_logger.warning("OpenRouter request skipped: OPENROUTER_API_KEY is empty")
             return None
@@ -56,15 +56,15 @@ class OpenRouterClient:
 
         app_logger.info("OpenRouter request started: model=%s", self.app_settings.openrouter_model)
         try:
-            response = httpx.post(
-                OPENROUTER_CHAT_COMPLETIONS_URL,
-                headers={
-                    "Authorization": f"Bearer {self.app_settings.openrouter_api_key}",
-                    "Content-Type": "application/json",
-                },
-                json=request_payload,
-                timeout=self.app_settings.openrouter_timeout_seconds,
-            )
+            async with httpx.AsyncClient(timeout=self.app_settings.openrouter_timeout_seconds) as httpx_connection:
+                response = await httpx_connection.post(
+                    OPENROUTER_CHAT_COMPLETIONS_URL,
+                    headers={
+                        "Authorization": f"Bearer {self.app_settings.openrouter_api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json=request_payload,
+                )
             app_logger.info("OpenRouter response received: status_code=%s", response.status_code)
             response.raise_for_status()
         except httpx.HTTPError as http_error:

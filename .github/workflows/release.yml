@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  release:
+    types:
+      - published
 
 concurrency:
   group: release-${{ github.ref }}
@@ -40,7 +43,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - run: gh release create ${{ github.ref_name }} --generate-notes
+      - name: Ensure GitHub release exists
+        if: github.event_name == 'push'
+        run: gh release view "$GITHUB_REF_NAME" || gh release create "$GITHUB_REF_NAME" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

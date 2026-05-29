@@ -18,7 +18,7 @@ RiskCategory = typing.Literal[
     "scope_violation",
 ]
 
-LOCAL_RULE_MIN_SCORE: typing.Final = 4
+LOCAL_RULE_MIN_SCORE: typing.Final = 5
 LOCAL_RULE_MIN_MARGIN: typing.Final = 2
 
 STATISTICAL_RULES_PATH: typing.Final = pathlib.Path(__file__).with_name("statistical_rules.json")

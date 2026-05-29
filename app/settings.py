@@ -4,15 +4,16 @@ import typing
 
 import pydantic_settings
 
-DEFAULT_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.4-mini"
-DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "anthropic/claude-sonnet-4.6"
+DEFAULT_OPENROUTER_MODEL: typing.Final = "anthropic/claude-haiku-4.5"
+DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-flash-lite"
 DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.5"
 DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 4.2
 DEFAULT_RISK_CACHE_SIZE: typing.Final = 1024
-DEFAULT_RISK_CONFIDENCE_THRESHOLD: typing.Final = 0.88
-DEFAULT_CLEAN_CONFIDENCE_THRESHOLD: typing.Final = 0.76
-DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD: typing.Final = 0.90
-DEFAULT_RISK_AGREEMENT_CONFIDENCE_THRESHOLD: typing.Final = 0.82
+DEFAULT_RISK_CONFIDENCE_THRESHOLD: typing.Final = 0.78
+DEFAULT_CLEAN_CONFIDENCE_THRESHOLD: typing.Final = 0.78
+DEFAULT_RISK_FAST_ACCEPT_CONFIDENCE_THRESHOLD: typing.Final = 0.86
+DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD: typing.Final = 0.86
+DEFAULT_RISK_AGREEMENT_CONFIDENCE_THRESHOLD: typing.Final = 0.78
 DEFAULT_LOG_LEVEL: typing.Final = "INFO"
 
 
@@ -27,6 +28,7 @@ class AppSettings(pydantic_settings.BaseSettings):
     risk_cache_size: int = DEFAULT_RISK_CACHE_SIZE
     risk_confidence_threshold: float = DEFAULT_RISK_CONFIDENCE_THRESHOLD
     clean_confidence_threshold: float = DEFAULT_CLEAN_CONFIDENCE_THRESHOLD
+    risk_fast_accept_confidence_threshold: float = DEFAULT_RISK_FAST_ACCEPT_CONFIDENCE_THRESHOLD
     risk_secondary_confidence_threshold: float = DEFAULT_RISK_SECONDARY_CONFIDENCE_THRESHOLD
     risk_agreement_confidence_threshold: float = DEFAULT_RISK_AGREEMENT_CONFIDENCE_THRESHOLD
     log_level: str = DEFAULT_LOG_LEVEL

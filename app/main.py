@@ -14,8 +14,8 @@ async def run_lifespan(fastapi_app: FastAPI) -> collections.abc.AsyncIterator[No
     fastapi_app.state.llm_client = load_llm()
 
     server_port = os.getenv("DEV_PORT", "8787")
-    app_logger.info("Server: http://localhost:{}", server_port)
-    app_logger.info("Docs:   http://localhost:{}/docs", server_port)
+    app_logger.info("server_url_configured", port=server_port, url=f"http://localhost:{server_port}")
+    app_logger.info("docs_url_configured", port=server_port, url=f"http://localhost:{server_port}/docs")
 
     yield
 

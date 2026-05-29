@@ -880,6 +880,14 @@ async def process_risk_detection(
 
     app_settings = load_settings()
     # Runtime pipeline for /check: local rules -> LLM fallback -> JSON parsing -> API contract shape.
+
+    if app_settings.enable_detection_classification_pipeline:
+        from app.chains import build_pipeline  # noqa: PLC0415  # ленивый импорт: разрывает цикл models<->chains
+
+        detection_classification_pipeline = build_pipeline().invoke(messages)
+        risk_category = detection_classification_pipeline.category
+        return {"category": typing.cast("RiskCategory", risk_category)} if risk_category else None
+
     local_risk_category = local_rules.process_dialogue_with_local_rules(
         messages,
         enable_statistical_rules_check=app_settings.enable_local_statistical_rules_check,

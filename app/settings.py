@@ -20,7 +20,12 @@ DEFAULT_ENABLE_LOCAL_REGEX_RULES_CHECK: typing.Final = True
 DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD: typing.Final = 0.30
 DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY: typing.Final = 0.90
 DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES: typing.Final = 50
+<<<<<<< Updated upstream
 DEFAULT_LOG_LEVEL: typing.Final = "WARNING"
+=======
+DEFAULT_LOG_LEVEL: typing.Final = "INFO"
+ENABLE_DETECTION_CLASSIFICATION_PIPELINE = True
+>>>>>>> Stashed changes
 
 
 @typing.final
@@ -40,6 +45,7 @@ class AppSettings(pydantic_settings.BaseSettings):
     enable_clean_role_distribution_check: bool = DEFAULT_ENABLE_CLEAN_ROLE_DISTRIBUTION_CHECK
     enable_local_statistical_rules_check: bool = DEFAULT_ENABLE_LOCAL_STATISTICAL_RULES_CHECK
     enable_local_regex_rules_check: bool = DEFAULT_ENABLE_LOCAL_REGEX_RULES_CHECK
+    enable_detection_classification_pipeline: bool = ENABLE_DETECTION_CLASSIFICATION_PIPELINE
     clean_user_message_frequency_threshold: float = DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD
     recovery_review_user_message_frequency: float = DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY
     recovery_review_min_messages: int = DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES

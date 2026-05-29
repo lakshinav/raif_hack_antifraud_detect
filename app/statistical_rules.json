@@ -8,7 +8,11 @@
       { "phrase": "disable_security_checks", "weight": 4 },
       { "phrase": "system prompt", "weight": 4 },
       { "phrase": "guardrails", "weight": 4 },
-      { "phrase": "risk score", "weight": 3 }
+      { "phrase": "risk score", "weight": 3 },
+      { "phrase": "(system\\s*prompt|guardrails?)", "weight": 5 },
+      { "phrase": "(bypass|обойти).*(правил|проверок)", "weight": 5 },
+      { "phrase": "игнориру(й|йте).*(правил|ограничен)", "weight": 5 },
+      { "phrase": "без\\s*(ограничен|проверок)", "weight": 3 }
     ],
     "identity_deception": [
       { "phrase": "чужой аккаунт", "weight": 5 },
@@ -17,7 +21,11 @@
       { "phrase": "кодовое слово", "weight": 4 },
       { "phrase": "селфи с паспорт", "weight": 4 },
       { "phrase": "паспортные данные", "weight": 3 },
-      { "phrase": "доступ буквально на пару минут", "weight": 3 }
+      { "phrase": "доступ буквально на пару минут", "weight": 3 },
+      { "phrase": "чуж(ой|ого)\\s*аккаунт", "weight": 5 },
+      { "phrase": "войти\\s*за\\s*друг(ого|ого\\s*человека)", "weight": 5 },
+      { "phrase": "доступ.*на.*пару.*минут", "weight": 4 },
+      { "phrase": "(паспорт|документ).*данн", "weight": 4 }
     ],
     "information_extraction": [
       { "phrase": "данные другого клиента", "weight": 5 },
@@ -26,7 +34,11 @@
       { "phrase": "когда вообще в последний раз", "weight": 4 },
       { "phrase": "даже без деталей", "weight": 3 },
       { "phrase": "чисто теоретически", "weight": 2 },
-      { "phrase": "pending", "weight": 2 }
+      { "phrase": "pending", "weight": 2 },
+      { "phrase": "данн(ые|ая).*(другого\\s*клиента)", "weight": 5 },
+      { "phrase": "операци(и|я).*(другого\\s*клиента)", "weight": 5 },
+      { "phrase": "когда.*в\\s*последний\\s*раз", "weight": 3 },
+      { "phrase": "хотя\\s*бы.*примерно", "weight": 3 }
     ],
     "transaction_coercion": [
       { "phrase": "требует срочно перевести", "weight": 4 },
@@ -34,7 +46,11 @@
       { "phrase": "перевести аванс", "weight": 4 },
       { "phrase": "оператор подтвердил", "weight": 4 },
       { "phrase": "вы бы рискнули", "weight": 3 },
-      { "phrase": "обычная сделка", "weight": 3 }
+      { "phrase": "обычная сделка", "weight": 3 },
+      { "phrase": "срочно.*перевест", "weight": 5 },
+      { "phrase": "нужно.*прямо.*сейчас", "weight": 4 },
+      { "phrase": "перевест.*аванс", "weight": 4 },
+      { "phrase": "очень.*тороп", "weight": 4 }
     ],
     "policy_manipulation": [
       { "phrase": "сделайте исключение", "weight": 4 },
@@ -44,7 +60,11 @@
       { "phrase": "изменить интерпретацию", "weight": 4 },
       { "phrase": "трактовать статус", "weight": 4 },
       { "phrase": "обойти policy", "weight": 4 },
-      { "phrase": "bypass policy", "weight": 4 }
+      { "phrase": "bypass policy", "weight": 4 },
+      { "phrase": "сдела(й|йте).*исключен", "weight": 5 },
+      { "phrase": "можно.*обойти", "weight": 4 },
+      { "phrase": "без.*проверок", "weight": 4 },
+      { "phrase": "особ(ый|ая).*случай", "weight": 4 }
     ],
     "scope_violation": [
       { "phrase": "жалоба в цб", "weight": 5 },
@@ -56,7 +76,17 @@
       { "phrase": "apns", "weight": 4 },
       { "phrase": "fcm", "weight": 4 },
       { "phrase": "backend retries", "weight": 4 },
-      { "phrase": "composite key", "weight": 4 }
+      { "phrase": "composite key", "weight": 4 },
+      { "phrase": "жалоб(а|у).*цб", "weight": 5 },
+      { "phrase": "написать.*жалоб", "weight": 5 },
+      { "phrase": "сформулиру(й|йте).*официально", "weight": 4 },
+      { "phrase": "помог(и|ите).*с.*код", "weight": 5 },
+      { "phrase": "напиши.*(функц|код)", "weight": 5 },
+      { "phrase": "объясни.*алгоритм", "weight": 4 },
+      { "phrase": "напиши.*(стих|хайку)", "weight": 4 },
+      { "phrase": "придумай.*(шутк|истор)", "weight": 3 },
+      { "phrase": "продавать.*или.*нет", "weight": 5 },
+      { "phrase": "что.*лучше.*сейчас", "weight": 4 }
     ]
   }
 }

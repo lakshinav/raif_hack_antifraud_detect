@@ -40,7 +40,20 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - run: gh release create ${{ github.ref_name }} --generate-notes
+      - name: Ensure GitHub release exists
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists, skipping creation"
+            exit 0
+          fi
+
+          gh release create "$GITHUB_REF_NAME" --generate-notes || {
+            if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+              echo "Release $GITHUB_REF_NAME was created by another event, skipping"
+              exit 0
+            fi
+            exit 1
+          }
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

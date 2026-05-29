@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import dataclasses
 import json
-import logging
 import pathlib
 import re
 import typing
+
+from app.logging_config import app_logger
 
 RiskCategory = typing.Literal[
     "policy_manipulation",
@@ -17,10 +18,9 @@ RiskCategory = typing.Literal[
     "scope_violation",
 ]
 
-LOCAL_RULE_MIN_SCORE: typing.Final = 4
+LOCAL_RULE_MIN_SCORE: typing.Final = 5
 LOCAL_RULE_MIN_MARGIN: typing.Final = 2
 
-app_logger = logging.getLogger("uvicorn.error")
 STATISTICAL_RULES_PATH: typing.Final = pathlib.Path(__file__).with_name("statistical_rules.json")
 
 
@@ -227,11 +227,11 @@ def load_statistical_rules() -> tuple[StatisticalRulePhrase, ...]:
     try:
         raw_payload: object = json.loads(STATISTICAL_RULES_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as load_error:
-        app_logger.warning("Statistical rules load failed: %s", load_error)
+        app_logger.warning("Statistical rules load failed: {}", load_error)
         return ()
 
     parsed_phrases = parse_statistical_rules(raw_payload)
-    app_logger.info("Statistical rules loaded: phrases=%s", len(parsed_phrases))
+    app_logger.info("Statistical rules loaded: phrases={}", len(parsed_phrases))
     return parsed_phrases
 
 
@@ -275,10 +275,10 @@ def process_dialogue_with_statistical_dictionary(normalized_dialogue: str) -> Ri
     category_scores = build_statistical_scores(normalized_dialogue)
     top_category = choose_top_category(category_scores)
     if top_category is None:
-        app_logger.info("Statistical dictionary result: fallback_to_regex scores=%s", category_scores)
+        app_logger.info("Statistical dictionary result: fallback_to_regex scores={}", category_scores)
         return None
 
-    app_logger.info("Statistical dictionary result: category=%s scores=%s", top_category, category_scores)
+    app_logger.info("Statistical dictionary result: category={} scores={}", top_category, category_scores)
     return top_category
 
 
@@ -319,8 +319,8 @@ def process_dialogue_with_local_rules(dialogue_text: str) -> RiskCategory | None
 
     top_category = choose_top_category(category_scores)
     if top_category is None:
-        app_logger.info("Local rules result: fallback_to_llm scores=%s", category_scores)
+        app_logger.info("Local rules result: fallback_to_llm scores={}", category_scores)
         return None
 
-    app_logger.info("Local rules result: category=%s scores=%s", top_category, category_scores)
+    app_logger.info("Local rules result: category={} scores={}", top_category, category_scores)
     return top_category

@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - 'v*.*.*'
-  release:
-    types:
-      - published
 
 concurrency:
   group: release-${{ github.ref }}
@@ -44,7 +41,6 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Ensure GitHub release exists
-        if: github.event_name == 'push'
         run: |
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             echo "Release $GITHUB_REF_NAME already exists, skipping creation"

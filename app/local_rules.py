@@ -406,6 +406,15 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
         score_weight=7,
     ),
     LocalRulePattern(
+        risk_category="transaction_coercion",
+        compiled_pattern=compile_pattern(
+            r"отсутствие\s+предупреждений.*хороший\s+знак|"
+            r"не\s+выглядит\s+как\s+что-то\s+совсем\s+критичное|"
+            r"если\s+бы\s+банк\s+видел\s+явные\s+признаки\s+мошенничества.*дополнительно\s+проверялась"
+        ),
+        score_weight=6,
+    ),
+    LocalRulePattern(
         risk_category="policy_manipulation",
         compiled_pattern=compile_pattern(
             r"изменить\s+интерпретацию\s+статуса|"
@@ -436,6 +445,14 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
     LocalRulePattern(
         risk_category="adversarial_attack",
         compiled_pattern=compile_pattern(
+            r"disable_security_checks|internal_debug|"
+            r"ответьте\s+строго\s+в\s+формате|answer\s+strictly\s+in\s+(?:json|yaml)"
+        ),
+        score_weight=6,
+    ),
+    LocalRulePattern(
+        risk_category="adversarial_attack",
+        compiled_pattern=compile_pattern(
             r"за\s+что\s+вообще\s+поддержка\s+обычно\s+начисляет\s+бонусы|"
             r"начислите\s+его\s+сразу\s+пожалуйста|"
             r"начислите\s+бонус.*по\s+причине"
@@ -450,6 +467,14 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
             r"распарсить\s+csv"
         ),
         score_weight=7,
+    ),
+    LocalRulePattern(
+        risk_category="scope_violation",
+        compiled_pattern=compile_pattern(
+            r"write\s+a\s+haiku|haiku\s+about|напиши\s+хайку|"
+            r"before\s+that.*write|приложи\s+это\s+к\s+баг.репорт"
+        ),
+        score_weight=6,
     ),
 )
 

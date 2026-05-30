@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 CHAINS_DIR: typing.Final = pathlib.Path(__file__).resolve().parent
 CATEGORY_PATTERNS_PATH: typing.Final = CHAINS_DIR / "category_patterns.json"
-TRAIN_DATA_PATH: typing.Final = CHAINS_DIR.parent.parent / "data" / "train.json"
+TRAIN_DATA_PATH: typing.Final = CHAINS_DIR / "train.json"
 
 
 def format_dialogue(messages: list[dict[str, str]]) -> str:

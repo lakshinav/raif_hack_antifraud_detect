@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from app.logging_config import app_logger
 
 # Путь к файлу с разметкой
-LABELED_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "check_request_labeled.json"
+LABELED_DATA_PATH = Path(__file__).parent.parent.parent / "app" / "check_request_labeled.json"
 
 # Кеш загруженных данных
 _labeled_data_cache: dict[str, dict] | None = None

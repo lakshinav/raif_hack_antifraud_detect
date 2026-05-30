@@ -8,6 +8,7 @@ from app.logging_config import app_logger
 from app.settings import AppSettings, load_settings
 
 OPENROUTER_CHAT_COMPLETIONS_URL: typing.Final = "https://openrouter.ai/api/v1/chat/completions"
+# OPENROUTER_CHAT_COMPLETIONS_URL: typing.Final = "https://gateway-ai.raiffeisen.ru/v1/chat/completions"
 
 
 def parse_completion_content(response_payload: object) -> str | None:

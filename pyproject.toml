@@ -66,6 +66,7 @@ ignore = [
 "app/models.py" = ["ERA001", "E501", "RUF001", "RUF002", "RUF003", "PLR0911"]
 "app/chains/*.py" = ["RUF001", "RUF002", "RUF003", "TC001", "TC002"]
 "tests/**/*.py" = ["S101", "ANN", "D"]
+"scripts/**/*.py" = ["T201", "E402", "INP001"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]

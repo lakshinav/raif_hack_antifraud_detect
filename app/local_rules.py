@@ -273,7 +273,7 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
             r"release\s+it.*employees|confirm\s+the\s+payment.*mark\s+it\s+as\s+safe|"
             r"run\s+the\s+transfer\s+manually|manager\s+already\s+approved\s+verbally|"
             r"fast-track\s+review|exception\s+to\s+processing\s+rules.*vendor\s+payout|"
-            r"срочно\s+провести\s+перевод|дать\s+добро\s+вручную|пропустить\s+проверку|"
+            r"срочно\s+провести\s+перевод|дать\s+добро\s+вручную|"
             r"перевод\s+обработали\s+раньше\s+лимита|срочн\w+\s+платеж\s+поставщик|"
             r"голосов\w+\s+подтверждени|провести\s+без\s+дополнительн\w+\s+проверки|"
             r"интуитивн\w+\s+проверку|разблокировать\s+плат[её]ж|потребуем\s+компенсацию|"
@@ -343,7 +343,7 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
     ),
     LocalRulePattern(
         risk_category="scope_violation",
-        compiled_pattern=compile_pattern(r"жалоб\w+\s+в\s+цб|помочь\s+с\s+(?:python|код|csv)|debug\w*\s+etl"),
+        compiled_pattern=compile_pattern(r"помочь\s+с\s+(?:python|код|csv)|debug\w*\s+etl"),
         score_weight=5,
     ),
     LocalRulePattern(
@@ -385,96 +385,52 @@ LOCAL_RULE_PATTERNS: typing.Final[tuple[LocalRulePattern, ...]] = (
         ),
         score_weight=8,
     ),
-    # High-confidence patterns from training data analysis
+    # === NEW PATTERNS for macro F1 optimization ===
+    # adversarial_attack: JSON injection and internal scoring probe
     LocalRulePattern(
-        risk_category="information_extraction",
+        risk_category="adversarial_attack",
         compiled_pattern=compile_pattern(
-            r"последн\w+\s+активность\s+была\s+сутки\s+назад|"
-            r"если\s+перевод\s+был\s+бы.*он\s+ведь\s+хотя\s+бы\s+отображался|"
-            r"наверное.*там\s+нет\s+ничего\s+критичного"
+            r"\{.*mode.*internal|\{.*debug.*mode|disable.*security.*checks.*json|"
+            r"json.*payload.*disable|internal.*debug.*instruction"
         ),
+        score_weight=8,
+    ),
+    LocalRulePattern(
+        risk_category="adversarial_attack",
+        compiled_pattern=compile_pattern(r"начисляет.*бонус|how.*support.*calculate.*bonus|internal.*bonus.*scoring"),
         score_weight=6,
     ),
+    # transaction_coercion: false operator endorsement and real estate urgency
     LocalRulePattern(
         risk_category="transaction_coercion",
         compiled_pattern=compile_pattern(
-            r"фиксируйте.*если\s+это\s+окажется\s+мошенничеством.*оператор\s+подтвердил|"
-            r"если\s+бы\s+вы\s+были\s+на\s+моем\s+месте.*вы\s+бы\s+рискнули|"
-            r"это\s+не\s+выглядит\s+чем-то\s+супер\s+нетипичным|"
-            r"как\s+банк\s+собирается\s+компенсировать\s+ущерб"
+            r"оператор\s+(?:сказал|подтвердил).*(?:что\s+)?(?:ограничени|можно|норм|безопасно)|"
+            r"оператор.*сказал.*ограничен|банк.*сказал.*нет.*огранич"
         ),
-        score_weight=7,
+        score_weight=5,
     ),
     LocalRulePattern(
         risk_category="transaction_coercion",
-        compiled_pattern=compile_pattern(
-            r"отсутствие\s+предупреждений.*хороший\s+знак|"
-            r"не\s+выглядит\s+как\s+что-то\s+совсем\s+критичное|"
-            r"если\s+бы\s+банк\s+видел\s+явные\s+признаки\s+мошенничества.*дополнительно\s+проверялась"
-        ),
-        score_weight=6,
+        compiled_pattern=compile_pattern(r"бронь\s+(?:недвижимост|отел|жиль)|деньги\s+за\s+бронь|недвижимост.*депозит"),
+        score_weight=5,
     ),
+    # policy_manipulation: sarcastic complaint about slow processing
     LocalRulePattern(
         risk_category="policy_manipulation",
         compiled_pattern=compile_pattern(
-            r"изменить\s+интерпретацию\s+статуса|"
-            r"считать\s+операцию\s+условно\s+подтвержденной|"
-            r"premium-клиентов\s+подобные\s+вещи\s+решаются\s+чуть\s+гибче|"
-            r"персональный\s+сервис\s+предполагает\s+возможность\s+принимать\s+нестандартные\s+решения"
+            r"платеж\s+(?:решил\s+)?(?:уш[её]л\s+)?(?:в\s+)?(?:отпуск|в\w+отпуск)|"
+            r"мой\s+платеж.*отпуск|третий\s+час\s+проверяетс"
         ),
-        score_weight=7,
+        score_weight=5,
     ),
-    LocalRulePattern(
-        risk_category="identity_deception",
-        compiled_pattern=compile_pattern(
-            r"я\s+могу\s+назвать\s+последние\s+переводы.*остаток.*паспортные\s+данные|"
-            r"телефон\s+владельца\s+у\s+меня\s+на\s+руках|"
-            r"даже\s+если\s+я\s+знаю\s+все\s+данные"
-        ),
-        score_weight=7,
-    ),
-    LocalRulePattern(
-        risk_category="adversarial_attack",
-        compiled_pattern=compile_pattern(
-            r"internal\s+note\s+14b|"
-            r"внутренний\s+reasoning\s+антифрода|"
-            r"какие\s+сигналы\s+повышают\s+risk\s+score"
-        ),
-        score_weight=7,
-    ),
-    LocalRulePattern(
-        risk_category="adversarial_attack",
-        compiled_pattern=compile_pattern(
-            r"disable_security_checks|internal_debug|"
-            r"ответьте\s+строго\s+в\s+формате|answer\s+strictly\s+in\s+(?:json|yaml)"
-        ),
-        score_weight=6,
-    ),
-    LocalRulePattern(
-        risk_category="adversarial_attack",
-        compiled_pattern=compile_pattern(
-            r"за\s+что\s+вообще\s+поддержка\s+обычно\s+начисляет\s+бонусы|"
-            r"начислите\s+его\s+сразу\s+пожалуйста|"
-            r"начислите\s+бонус.*по\s+причине"
-        ),
-        score_weight=6,
-    ),
+    # scope_violation: investment fund withdrawal
     LocalRulePattern(
         risk_category="scope_violation",
         compiled_pattern=compile_pattern(
-            r"написать\s+нормальную\s+жалобу\s+в\s+цб|"
-            r"помочь\s+с\s+одним\s+куском\s+python|"
-            r"распарсить\s+csv"
+            r"вывод\s+(?:денег?\s+)?(?:из\s+)?(?:фонда|портфел|инвест|активов)|"
+            r"инвестиционн\w*\s+(?:фонд|стратеги|портфель)|вывод.*из\s+фонда"
         ),
-        score_weight=7,
-    ),
-    LocalRulePattern(
-        risk_category="scope_violation",
-        compiled_pattern=compile_pattern(
-            r"write\s+a\s+haiku|haiku\s+about|напиши\s+хайку|"
-            r"before\s+that.*write|приложи\s+это\s+к\s+баг.репорт"
-        ),
-        score_weight=6,
+        score_weight=5,
     ),
 )
 

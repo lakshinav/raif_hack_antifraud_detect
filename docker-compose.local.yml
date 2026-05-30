@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - "8787:8000"
+      - "8000:8000"
     environment:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       # HF-режим (опционально):

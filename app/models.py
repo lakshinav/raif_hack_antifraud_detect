@@ -887,10 +887,13 @@ async def process_risk_detection(
     if app_settings.enable_detection_classification_pipeline:
         from app.chains import build_pipeline  # noqa: PLC0415  # ленивый импорт: разрывает цикл models<->chains
 
-        detection_classification_pipeline = build_pipeline().invoke(messages)
-        risk_category = detection_classification_pipeline.category
-        if risk_category:
-            return {"category": typing.cast("RiskCategory", risk_category)}
+        try:
+            detection_classification_pipeline = await build_pipeline().ainvoke(messages)
+            risk_category = detection_classification_pipeline.category
+            if risk_category:
+                return {"category": typing.cast("RiskCategory", risk_category)}
+        except Exception as e:  # noqa: BLE001
+            app_logger.exception("process_risk_detection", error=e)
 
     local_risk_category = local_rules.process_dialogue_with_local_rules(
         messages,

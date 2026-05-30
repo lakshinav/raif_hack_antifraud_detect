@@ -8,7 +8,6 @@ dependencies = [
     "uvicorn[standard]==0.40.0",
     "httpx>=0.28.1",
     "pydantic-settings>=2.0.0",
-    "loguru>=0.7.3",
     "pandas==3.0.3",
     "numpy==2.4.2",
     "matplotlib==3.10.9",
@@ -20,6 +19,10 @@ dependencies = [
     "wordcloud==1.9.6",
     "pymystem3==0.2.0",
     "catboost==1.2.10",
+    "structlog>=25.0.0",
+    "joblib>=1.5.3",
+    "langchain-core>=0.3",
+    "langchain-openai>=0.2",
 ]
 
 [dependency-groups]
@@ -60,7 +63,8 @@ ignore = [
 "app/**/__init__.py" = ["F401"]
 "app/routers/*.py" = ["B008"]
 "app/main.py" = ["B008"]
-"app/models.py" = ["ERA001"]
+"app/models.py" = ["ERA001", "E501", "RUF001", "RUF002", "RUF003", "PLR0911"]
+"app/chains/*.py" = ["RUF001", "RUF002", "RUF003", "TC001", "TC002"]
 "tests/**/*.py" = ["S101", "ANN", "D"]
 "scripts/**/*.py" = ["T201", "E402", "INP001"]
 

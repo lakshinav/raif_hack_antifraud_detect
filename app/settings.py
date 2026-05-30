@@ -20,14 +20,16 @@ DEFAULT_ENABLE_LOCAL_REGEX_RULES_CHECK: typing.Final = True
 DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD: typing.Final = 0.30
 DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY: typing.Final = 0.40
 DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES: typing.Final = 6
+DEFAULT_LOG_LEVEL: typing.Final = "WARNING"
 DEFAULT_LOG_LEVEL: typing.Final = "INFO"
+ENABLE_DETECTION_CLASSIFICATION_PIPELINE = True
 
 
 @typing.final
 class AppSettings(pydantic_settings.BaseSettings):
     openrouter_api_key: str = ""
     openrouter_model: str = DEFAULT_OPENROUTER_MODEL
-    openrouter_primary_model: str = ""
+    openrouter_primary_model: str = DEFAULT_OPENROUTER_MODEL
     openrouter_secondary_model: str = DEFAULT_SECONDARY_OPENROUTER_MODEL
     openrouter_judge_model: str = DEFAULT_JUDGE_OPENROUTER_MODEL
     openrouter_timeout_seconds: float = DEFAULT_OPENROUTER_TIMEOUT_SECONDS
@@ -40,6 +42,7 @@ class AppSettings(pydantic_settings.BaseSettings):
     enable_clean_role_distribution_check: bool = DEFAULT_ENABLE_CLEAN_ROLE_DISTRIBUTION_CHECK
     enable_local_statistical_rules_check: bool = DEFAULT_ENABLE_LOCAL_STATISTICAL_RULES_CHECK
     enable_local_regex_rules_check: bool = DEFAULT_ENABLE_LOCAL_REGEX_RULES_CHECK
+    enable_detection_classification_pipeline: bool = ENABLE_DETECTION_CLASSIFICATION_PIPELINE
     clean_user_message_frequency_threshold: float = DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD
     recovery_review_user_message_frequency: float = DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY
     recovery_review_min_messages: int = DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES

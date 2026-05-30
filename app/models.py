@@ -889,7 +889,8 @@ async def process_risk_detection(
 
         detection_classification_pipeline = build_pipeline().invoke(messages)
         risk_category = detection_classification_pipeline.category
-        return {"category": typing.cast("RiskCategory", risk_category)} if risk_category else None
+        if risk_category:
+            return {"category": typing.cast("RiskCategory", risk_category)}
 
     local_risk_category = local_rules.process_dialogue_with_local_rules(
         messages,

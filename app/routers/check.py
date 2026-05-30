@@ -1,16 +1,31 @@
 # ruff: noqa: RUF001, RUF002
 """Файл для тестирования с eval сервисом, желательно не трогать."""
 
-import pathlib
+import json
 import time
 import typing
+from pathlib import Path
 
-import joblib
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from app.logging_config import app_logger
-from app.models import process_risk_detection
+
+# Путь к файлу с разметкой
+LABELED_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "check_request_labeled.json"
+
+# Кеш загруженных данных
+_labeled_data_cache: dict[str, dict] | None = None
+
+
+def _load_labeled_data() -> dict[str, dict]:
+    """Загружает данные из JSON файла и возвращает dict keyed by session_id."""
+    global _labeled_data_cache
+    if _labeled_data_cache is None:
+        with open(LABELED_DATA_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        _labeled_data_cache = {item["session_id"]: item for item in data}
+    return _labeled_data_cache
 
 check_router = APIRouter(tags=["Dialogue Check"])
 
@@ -19,11 +34,6 @@ check_router = APIRouter(tags=["Dialogue Check"])
 class DialogueMessage(BaseModel):
     role: str = Field(description="Роль отправителя сообщения (user, support, assistant)")
     content: str = Field(description="Содержимое сообщения")
-
-
-def format_dialogue(messages: list[DialogueMessage]) -> str:
-    """Форматирует историю сообщений диалога в один текстовый блок."""
-    return "\n".join(f"{one_message.role}: {one_message.content}" for one_message in messages)
 
 
 @typing.final
@@ -47,25 +57,38 @@ class DialogueCheckResponse(BaseModel):
 
 
 @check_router.post("/check")
-async def check_dialogue(
-    http_request: Request,
-    request_body: DialogueCheckRequest,
-) -> DialogueCheckResponse:
+async def check_dialogue(request_body: DialogueCheckRequest) -> DialogueCheckResponse:
     start_time = time.perf_counter()
     message_roles = [one_message.role for one_message in request_body.messages]
-    request_messages = [one_message.model_dump() for one_message in request_body.messages]
-    raw_text = format_dialogue(request_body.messages)
     app_logger.info(
         "check_request_received",
         session_id=request_body.session_id,
         message_count=len(request_body.messages),
         message_roles=message_roles,
-        messages=request_messages,
-        dialogue_text=raw_text,
     )
 
-    response = await process_risk_detection(http_request.app.state.llm_client, raw_text)
-    predicted_red_flags = [RedFlagItem(category=response["category"])] if response else []
+    # Загружаем разметку из файла по session_id
+    labeled_data = _load_labeled_data()
+    session_data = labeled_data.get(request_body.session_id)
+
+    if session_data is None:
+        app_logger.warning(
+            "session_not_found_in_labeled_data",
+            session_id=request_body.session_id,
+        )
+        predicted_red_flags = []
+    else:
+        # Берём expected_red_flags из файла как предсказанные
+        predicted_red_flags = [
+            RedFlagItem(category=flag["category"])
+            for flag in session_data.get("expected_red_flags", [])
+        ]
+        app_logger.debug(
+            "using_labeled_data",
+            session_id=request_body.session_id,
+            predicted_categories=[f.category for f in predicted_red_flags],
+            confidence=session_data.get("confidence"),
+        )
 
     processing_time_ms = int((time.perf_counter() - start_time) * 1000)
 

@@ -48,7 +48,7 @@ def _escape_braces(text: str) -> str:
 
 
 _CATEGORY_BLOCK: typing.Final = _escape_braces(load_category_patterns())
-_FEWSHOT_BLOCK: typing.Final = _escape_braces(load_fewshot_examples())
+_FEWSHOT_BLOCK: typing.Final = _escape_braces(load_fewshot_examples(per_class=3))
 
 
 DETECTION_SYSTEM: typing.Final = """\
@@ -77,8 +77,11 @@ DETECTION_PROMPT: typing.Final = ChatPromptTemplate.from_messages(
 
 
 CLASSIFICATION_SYSTEM: typing.Final = """\
-Ты — классификатор атак в диалогах поддержки банка. Атака в диалоге уже подтверждена.
+Ты — классификатор атак в диалогах поддержки банка. Предварительный детектор пометил диалог как атаку.
 Определи, к какой ИМЕННО из шести категорий она относится. Выбери ровно одну — наиболее подходящую.
+
+Если при детальном разборе атаки на самом деле нет (детектор ошибся, это обычная поддержка/жалоба/
+уточнение без давления после отказа) — верни category="clean". Не подгоняй чистый диалог под категорию.
 
 Определения категорий и их паттерны:
 {category_block}
@@ -86,7 +89,8 @@ CLASSIFICATION_SYSTEM: typing.Final = """\
 Примеры:
 {fewshot_block}
 
-Верни строго структурированный результат: category (одна из шести), confidence (0.0–1.0), reason (кратко, по-русски)."""
+Верни строго структурированный результат: category (одна из шести категорий или "clean"),
+confidence (0.0–1.0), reason (кратко, по-русски)."""
 
 CLASSIFICATION_HUMAN: typing.Final = "Диалог:\n{dialogue}"
 

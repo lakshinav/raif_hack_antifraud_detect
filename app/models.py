@@ -888,12 +888,14 @@ async def process_risk_detection(
         from app.chains import build_pipeline  # noqa: PLC0415  # ленивый импорт: разрывает цикл models<->chains
 
         try:
-            detection_classification_pipeline = await build_pipeline().ainvoke(messages)
-            risk_category = detection_classification_pipeline.category
-            if risk_category:
-                return {"category": typing.cast("RiskCategory", risk_category)}
-        except Exception as e:  # noqa: BLE001
-            app_logger.exception("process_risk_detection", error=e)
+            pipeline_result = await build_pipeline().ainvoke(messages)
+        except Exception as pipeline_error:  # noqa: BLE001
+            # Сетевой сбой/таймаут/ошибка парсинга structured output — не роняем /check,
+            # проваливаемся в local_rules -> legacy LLM как страховку.
+            app_logger.exception("risk_pipeline_failed", error=pipeline_error)
+        else:
+            if pipeline_result.category:
+                return {"category": typing.cast("RiskCategory", pipeline_result.category)}
 
     local_risk_category = local_rules.process_dialogue_with_local_rules(
         messages,

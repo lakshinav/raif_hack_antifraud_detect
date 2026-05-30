@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 
-from app.models import RiskCategory
+from app.models import PossibleRiskCategory
 
 
 @typing.final
@@ -24,7 +24,9 @@ class DetectionResult(pydantic.BaseModel):
 class ClassificationResult(pydantic.BaseModel):
     """Результат второго chain: к какой категории относится атака."""
 
-    category: RiskCategory = pydantic.Field(description="Одна из шести категорий атаки.")
+    category: PossibleRiskCategory = pydantic.Field(
+        description="Одна из шести категорий атаки, либо 'clean', если при детальном разборе атаки нет.",
+    )
     confidence: float = pydantic.Field(
         ge=0.0,
         le=1.0,

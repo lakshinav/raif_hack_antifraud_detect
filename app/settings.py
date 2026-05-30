@@ -4,10 +4,10 @@ import typing
 
 import pydantic_settings
 
-DEFAULT_OPENROUTER_MODEL: typing.Final = "qwen/qwen3.5-122b-a10b"
-DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "qwen/qwen3.5-397b-a17b"
-DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "qwen/qwen3.5-397b-a17b"
-DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 4.2
+DEFAULT_OPENROUTER_MODEL: typing.Final = "anthropic/claude-opus-4.8"
+DEFAULT_SECONDARY_OPENROUTER_MODEL: typing.Final = "openai/gpt-5.5"
+DEFAULT_JUDGE_OPENROUTER_MODEL: typing.Final = "google/gemini-3.1-pro-preview"
+DEFAULT_OPENROUTER_TIMEOUT_SECONDS: typing.Final = 30.0
 DEFAULT_RISK_CACHE_SIZE: typing.Final = 1024
 DEFAULT_RISK_CONFIDENCE_THRESHOLD: typing.Final = 0.78
 DEFAULT_CLEAN_CONFIDENCE_THRESHOLD: typing.Final = 0.92

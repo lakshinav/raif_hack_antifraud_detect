@@ -17,10 +17,15 @@ DEFAULT_RISK_AGREEMENT_CONFIDENCE_THRESHOLD: typing.Final = 0.68
 DEFAULT_ENABLE_CLEAN_ROLE_DISTRIBUTION_CHECK: typing.Final = True
 DEFAULT_ENABLE_LOCAL_STATISTICAL_RULES_CHECK: typing.Final = False
 DEFAULT_ENABLE_LOCAL_REGEX_RULES_CHECK: typing.Final = True
+DEFAULT_ENABLE_SEMANTIC_CLASSIFIER: typing.Final = False
+# OpenAI-совместимый эндпоинт эмбеддингов. По умолчанию указывает на OpenRouter; если провайдер
+# не отдаёт /embeddings — семантика молча отключается (см. app/chains/semantic.py).
+DEFAULT_EMBEDDINGS_BASE_URL: typing.Final = "https://openrouter.ai/api/v1"
+DEFAULT_EMBEDDINGS_MODEL: typing.Final = "openai/text-embedding-3-small"
+DEFAULT_SEMANTIC_MARGIN: typing.Final = 0.04
 DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD: typing.Final = 0.30
 DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY: typing.Final = 0.40
 DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES: typing.Final = 6
-DEFAULT_LOG_LEVEL: typing.Final = "WARNING"
 DEFAULT_LOG_LEVEL: typing.Final = "INFO"
 ENABLE_DETECTION_CLASSIFICATION_PIPELINE = True
 
@@ -43,6 +48,10 @@ class AppSettings(pydantic_settings.BaseSettings):
     enable_local_statistical_rules_check: bool = DEFAULT_ENABLE_LOCAL_STATISTICAL_RULES_CHECK
     enable_local_regex_rules_check: bool = DEFAULT_ENABLE_LOCAL_REGEX_RULES_CHECK
     enable_detection_classification_pipeline: bool = ENABLE_DETECTION_CLASSIFICATION_PIPELINE
+    enable_semantic_classifier: bool = DEFAULT_ENABLE_SEMANTIC_CLASSIFIER
+    embeddings_base_url: str = DEFAULT_EMBEDDINGS_BASE_URL
+    embeddings_model: str = DEFAULT_EMBEDDINGS_MODEL
+    semantic_margin: float = DEFAULT_SEMANTIC_MARGIN
     clean_user_message_frequency_threshold: float = DEFAULT_CLEAN_USER_MESSAGE_FREQUENCY_THRESHOLD
     recovery_review_user_message_frequency: float = DEFAULT_RECOVERY_REVIEW_USER_MESSAGE_FREQUENCY
     recovery_review_min_messages: int = DEFAULT_RECOVERY_REVIEW_MIN_MESSAGES

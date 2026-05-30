@@ -26,8 +26,8 @@ def build_pipeline(model: str | None = None) -> Runnable[str, PipelineResult]:
     detection_chain = build_detection_chain(model)
     classification_chain = build_classification_chain(model)
 
-    def _run(dialogue: str) -> PipelineResult:
-        detection = detection_chain.invoke(dialogue)
+    async def _run(dialogue: str) -> PipelineResult:
+        detection = await detection_chain.ainvoke(dialogue)
         if not detection.is_attack:
             return PipelineResult(
                 is_attack=False,
@@ -36,7 +36,7 @@ def build_pipeline(model: str | None = None) -> Runnable[str, PipelineResult]:
                 classification_confidence=None,
                 reason=detection.reason,
             )
-        classification = classification_chain.invoke(dialogue)
+        classification = await classification_chain.ainvoke(dialogue)
         return PipelineResult(
             is_attack=True,
             category=classification.category,

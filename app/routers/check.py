@@ -1,11 +1,9 @@
 # ruff: noqa: RUF001, RUF002
 """Файл для тестирования с eval сервисом, желательно не трогать."""
 
-import pathlib
 import time
 import typing
 
-import joblib
 from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
